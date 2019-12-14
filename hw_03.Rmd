@@ -1,0 +1,83 @@
+---
+title: "hw_3"
+author: "Anna Oskina"
+date: "14 12 2019"
+output: html_document
+---
+
+```{r, message=FALSE}
+library(tidyverse)
+library(tidytext)
+library(gutenbergr)
+library(udpipe)
+```
+
+## Задание 3.1
+
+
+```{r}
+jsonlite::read_json("C:/Users/annao/Documents/R/fpl_data_2018_2019.json") -> fpl
+
+fpl %>%
+  map("Goals") %>%
+  unlist() %>% 
+  enframe() %>% 
+  mutate(number = as.integer(value)) %>% 
+  select(name, number)-> goals
+  
+fpl %>% 
+  map("Club") %>% 
+  unlist() %>% 
+  enframe() %>% 
+  mutate(club = value) %>% 
+  select(name, club) -> clubs
+  
+full_join(clubs, goals) %>% 
+arrange(desc(number)) %>%
+slice(1:30)-> my_tbl
+
+my_tbl %>% 
+  ggplot(aes(fct_reorder(name, number), number, fill = club))+
+  labs(x = "",
+       y = "",
+       title = "Number of goals",
+       caption = "data from premierlegue.com")+
+  geom_col()+
+  coord_flip()
+```
+
+## Задание 3.2
+
+
+```{r}
+str(gutenberg_metadata)
+gutenberg_metadata %>% 
+  filter(title == "Женское международное движение: Сборник статей") %>% 
+  distinct(gutenberg_id, title)
+
+dvizheniye <- gutenberg_download(37196)
+stop_words <- read_csv("https://raw.githubusercontent.com/r-classes/ds4dh-hw3-annaoskina/master/data/stopwords-ru.csv?token=ANFX3SK5EC3WJSL3JQZO3S257UCL6")
+
+dvizheniye %>% 
+  unnest_tokens(word, text) %>% 
+  count(word, sort = TRUE) %>% 
+  anti_join(stop_words) %>% 
+  slice(1:20) -> dvizheniye_20
+
+dvizheniye_20 %>% 
+  ggplot(aes(fct_reorder(word, n), n))+
+  labs(x = "",
+       y = "",
+       title = "'Женское международное движение: Сборник статей': частотные слова",
+       caption = "source www.gutenberg.com")+
+  geom_col()+
+  coord_flip()
+```
+
+
+## Задание 3.3
+
+
+```{r}
+
+```
